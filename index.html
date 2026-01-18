@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Michell Realtor In - Premium 3D Property Tours</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #0f3460;
+            --accent: #d4af37;
+            --accent-light: #e8c547;
+            --text-light: #e0e0e0;
+            --text-dark: #a0a0a0;
+            --card-bg: #16213e;
+            --border-color: rgba(212, 175, 55, 0.2);
+            /* Added preloader color variables */
+            --mr-gold: #c9a44a;
+            /* Updated to deep black #0a0a0a */
+            --mr-black: #0a0a0a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Changed from gradient to solid deep black to match preloader */
+            background: #0a0a0a;
+            background-attachment: fixed;
+            color: var(--text-light);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Replaced preloader CSS with the exact solution CSS */
+        /* ================= MICHELL REALTOR PRELOADER ================= */
+        #mr-preloader {
+            position: fixed;
+            inset: 0;
+            background: var(--mr-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 1.2s ease; /* Added transition for fade-out */
+        }
+
+        .mr-frame {
+            width: 260px;
+            height: 160px;
+            position: relative;
+        }
+
+        /* Gold frame lines */
+        .mr-line {
+            position: absolute;
+            background: var(--mr-gold);
+            opacity: 0;
+        }
+
+        .mr-line.top,
+        .mr-line.bottom {
+            height: 1px;
+            width: 0;
+            left: 0;
+        }
+
+        .mr-line.left,
+        .mr-line.right {
+            width: 1px;
+            height: 0;
+            top: 0;
+        }
+
+        .mr-line.top {
+            top: 0;
+            animation: mr-drawH 1s ease-out forwards;
+        }
+        .mr-line.right {
+            right: 0;
+            animation: mr-drawV 1s ease-out forwards 1s;
+        }
+        .mr-line.bottom {
+            bottom: 0;
+            animation: mr-drawH 1s ease-out forwards 2s;
+        }
+        .mr-line.left {
+            left: 0;
+            animation: mr-drawV 1s ease-out forwards 3s;
+        }
+
+        @keyframes mr-drawH {
+            to { width: 100%; opacity: 1; }
+        }
+        @keyframes mr-drawV {
+            to { height: 100%; opacity: 1; }
+        }
+
+        /* Coordinate grid (subtle, institutional) */
+        .mr-coords {
+            position: absolute;
+            inset: -20px;
+            background:
+                repeating-linear-gradient(
+                    to right,
+                    rgba(201,164,74,.08) 0,
+                    rgba(201,164,74,.08) 1px,
+                    transparent 1px,
+                    transparent 40px
+                ),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(201,164,74,.08) 0,
+                    rgba(201,164,74,.08) 1px,
+                    transparent 1px,
+                    transparent 40px
+                );
+            opacity: 0;
+            animation: mr-coordsIn 1.5s ease forwards 3.6s;
+        }
+
+        @keyframes mr-coordsIn {
+            to { opacity: 1; }
+        }
+
+        /* Brand engrave */
+        .mr-brand {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--mr-gold);
+            letter-spacing: 4px;
+            opacity: 0;
+            animation: mr-engrave 1.8s ease forwards 4.2s;
+        }
+
+        .mr-brand h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .mr-brand span {
+            font-size: 11px;
+            letter-spacing: 6px;
+            margin-top: 8px;
+            opacity: .85;
+        }
+
+        @keyframes mr-engrave {
+            from {
+                opacity: 0;
+                clip-path: inset(0 100% 0 0);
+            }
+            to {
+                opacity: 1;
+                clip-path: inset(0 0 0 0);
+            }
+        }
+
+        /* Exit */
+        body.mr-loaded #mr-preloader {
+            opacity: 0;
+            pointer-events: none;
+            /* transition: opacity 1.2s ease; Removed as it's now on the #mr-preloader element */
+        }
+
+        /* ===== MAIN PAGES ===== */
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ===== NAVBAR ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: rgba(26, 26, 46, 0.7);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.95rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* ===== PAGE 1: LANDING ===== */
+        #page1 {
+            padding-top: 0;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.15), transparent);
+            border-radius: 50%;
+            top: 10%;
+            right: 5%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(30px); }
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            color: #1a1a2e;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* EXPERIENCE SECTION */
+        .experience {
+            padding: 6rem 5%;
+            margin: 2rem 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .experience-image {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.2);
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .experience-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .experience-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(15, 52, 96, 0.2));
+            z-index: 1;
+        }
+
+        .experience-content {
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .experience-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .experience-content p {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .experience-content .btn {
+            display: inline-block;
+        }
+
+        /* FEATURES SECTION */
+        .features {
+            padding: 6rem 5%;
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-intro {
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(22, 33, 62, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Updated feature-icon to display SVG icons with proper styling */
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .feature-icon svg {
+            width: 45px;
+            height: 45px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent);
+        }
+
+        .feature-card p {
+            color: var(--text-dark);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* PROPERTIES SECTION */
+        .properties {
+            padding: 6rem 5%;
+            text-align: center;
+        }
+
+        .properties h2 {
+            font-size: 2.8rem;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .property-card {
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .property-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 50px rgba(212, 175, 55, 0.2);
+            border-color: var(--accent);
+        }
+
+        .property-image {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover .property-image img {
+            transform: scale(1.05);
+        }
+
+        .property-details {
+            padding: 1.5rem;
+        }
+
+        .property-address {
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .property-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 1.5rem 0;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .property-price {
+            font-size: 1.5rem;
+            color: var(--accent);
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .property-card .btn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* HOW IT WORKS */
+        .how-it-works {
+            padding: 6rem 5%;
+            text-align: center;
+        }
+
+        .how-it-works h2 {
+            font-size: 2.8rem;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .step {
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 0 auto 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(212, 175, 55, 0);
+            }
+        }
+
+        .step h3 {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+        }
+
+        .step p {
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* TESTIMONIALS */
+        .testimonials {
+            padding: 6rem 5%;
+            text-align: center;
+        }
+
+        .testimonials h2 {
+            font-size: 2.8rem;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: rgba(22, 33, 62, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15);
+        }
+
+        .stars {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            color: var(--text-dark);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* CONTACT SECTION */
+        .contact {
+            padding: 6rem 5%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .contact h2 {
+            font-size: 2.8rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .contact-form {
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .contact-form button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .contact-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--accent-light);
+        }
+
+        /* ===== PAGE 2: TOKEN VERIFICATION ===== */
+        .token-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .token-box {
+            background: rgba(22, 33, 62, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+            border-radius: 15px;
+            max-width: 450px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .token-box h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .token-box p {
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+        }
+
+        .token-input {
+            width: 100%;
+            padding: 0.9rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .token-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .token-input.shake {
+            animation: shake 0.5s ease-in-out;
+            border-color: #ff6b6b;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .token-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .token-buttons button {
+            flex: 1;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .verify-btn {
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            color: #1a1a2e;
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .back-btn {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .back-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* ===== PAGE 3: LOADING ===== */
+        .loading-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(212, 175, 55, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 300px;
+            height: 4px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d4af37, #e8c547);
+            width: 0%;
+            animation: progress 5s ease-in-out forwards;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .loading-text {
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        /* ===== PAGE 4: DOWNLOAD ===== */
+        .download-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            margin-top: 80px;
+        }
+
+        .download-box {
+            background: rgba(22, 33, 62, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3rem;
+            animation: bounce 0.8s ease-out;
+        }
+
+        @keyframes bounce {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .download-box h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .download-box p {
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .download-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .download-btn {
+            padding: 1rem;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .features-list {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .features-list li {
+            color: var(--text-dark);
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .back-home-btn {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #d4af37, #e8c547);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .experience {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .experience-content h2 {
+                font-size: 1.8rem;
+            }
+
+            .features-grid,
+            .properties-grid,
+            .testimonials-grid,
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .token-box,
+            .download-box {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- MICHELL REALTOR PRELOADER -->
+    <div id="mr-preloader">
+        <div class="mr-frame">
+            <div class="mr-coords"></div>
+
+            <div class="mr-line top"></div>
+            <div class="mr-line right"></div>
+            <div class="mr-line bottom"></div>
+            <div class="mr-line left"></div>
+
+            <div class="mr-brand">
+                <h1>MICHELL REALTOR</h1>
+                <span>Home Starts Here</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo" onclick="goToPage('page1')">MICHELL</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="event.preventDefault(); goToPage('page1'); scrollToSection('experience');">Features</a></li>
+            <li><a href="#" onclick="event.preventDefault(); goToPage('page1'); scrollToSection('properties');">Properties</a></li>
+            <li><a href="#" onclick="event.preventDefault(); goToPage('page1'); scrollToSection('contact');">Contact</a></li>
+            <li><a href="#" onclick="event.preventDefault(); goToPage('page2');">Begin</a></li>
+        </ul>
+    </nav>
+
+    <!-- PAGE 1: LANDING PAGE -->
+    <div class="page active" id="page1">
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Experience Properties Like Never Before</h1>
+                <p>Explore stunning apartments and properties in immersive 3D. View floor plans, measurements, and every detail from your home.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="goToPage('page2')">Begin Your Tour</button>
+                    <button class="btn btn-secondary" onclick="scrollToSection('contact')">Learn More</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXPERIENCE SECTION -->
+        <section class="experience">
+            <div class="experience-image">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=600&fit=crop" alt="Luxury Modern Apartment">
+            </div>
+            <div class="experience-content">
+                <h2>Experience Properties Like Never Before</h2>
+                <p>Explore stunning apartments and properties in immersive 3D. View floor plans, measurements, and every detail from your home. Our cutting-edge technology brings properties to life, allowing you to make informed decisions with confidence.</p>
+                <button class="btn btn-primary" onclick="goToPage('page2')">Start Exploring</button>
+            </div>
+        </section>
+
+        <!-- FEATURES SECTION -->
+        <section class="features" id="features">
+            <h2>Powerful Features</h2>
+            <p class="features-intro">Everything you need to find your perfect property</p>
+            <div class="features-grid">
+                <!-- Replaced emoji with advanced SVG icon for 3D tours -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                            <path d="M12 8l-4 2.5v4l4 2.5 4-2.5v-4L12 8z"/>
+                            <circle cx="12" cy="12" r="1.5"/>
+                        </svg>
+                    </div>
+                    <h3>3D Property Tours</h3>
+                    <p>Immersive 360° views of every room. Explore properties from every angle with crystal-clear detail.</p>
+                </div>
+
+                <!-- Replaced emoji with advanced SVG icon for floor plans -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="3" width="18" height="18" rx="1"/>
+                            <line x1="9" y1="3" x2="9" y2="21"/>
+                            <line x1="15" y1="3" x2="15" y2="21"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="3" y1="15" x2="21" y2="15"/>
+                            <circle cx="6" cy="6" r="1"/>
+                            <circle cx="12" cy="12" r="1"/>
+                            <circle cx="18" cy="18" r="1"/>
+                        </svg>
+                    </div>
+                    <h3>Interactive Floor Plans</h3>
+                    <p>Detailed blueprints with exact measurements. Understand the layout perfectly before visiting.</p>
+                </div>
+
+                <!-- Replaced emoji with advanced SVG icon for search -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="10" cy="10" r="7"/>
+                            <path d="M14.5 14.5l5.5 5.5"/>
+                            <path d="M4 10h12M10 4v12"/>
+                        </svg>
+                    </div>
+                    <h3>Advanced Search</h3>
+                    <p>Filter properties by price, size, location, amenities, and more. Find exactly what you need.</p>
+                </div>
+
+                <!-- Replaced emoji with advanced SVG icon for favorites -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </div>
+                    <h3>Save Favorites</h3>
+                    <p>Mark your favorite properties and create watchlists. Never miss an opportunity.</p>
+                </div>
+
+                <!-- Replaced emoji with advanced SVG icon for cross-platform -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="3" width="8" height="12" rx="1"/>
+                            <rect x="14" y="3" width="8" height="12" rx="1"/>
+                            <path d="M5 16h14M8 20h8"/>
+                        </svg>
+                    </div>
+                    <h3>Cross-Platform</h3>
+                    <p>Access properties on Windows, Mac, iOS, and Android. Browse anytime, anywhere.</p>
+                </div>
+
+                <!-- Replaced emoji with advanced SVG icon for expert support -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/>
+                            <path d="M14 8l4-2"/>
+                            <path d="M14 10l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Expert Support</h3>
+                    <p>Connect with our real estate agents. Get professional guidance throughout your journey.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROPERTIES SECTION -->
+        <section class="properties" id="properties">
+            <h2>Featured Properties</h2>
+            <div class="properties-grid">
+                <div class="property-card">
+                    <div class="property-image">
+                        <img src="https://plus.unsplash.com/premium_photo-1674676471417-07f613528a94?q=80&w=1145&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Modern Downtown Apartment">
+                    </div>
+                    <div class="property-details">
+                        <div class="property-address">Downtown Luxury Suite</div>
+                        <div class="property-info">
+                            <span>🛏️ 2 Bed</span>
+                            <span>🛁 2 Bath</span>
+                            <span>📐 1,200 sq ft</span>
+                        </div>
+                        <div class="property-price">$3,500/month</div>
+                        <button class="btn btn-primary" onclick="goToPage('page2')">View in 3D</button>
+                    </div>
+                </div>
+
+                <div class="property-card">
+                    <div class="property-image">
+                        <img src="https://plus.unsplash.com/premium_photo-1661872779873-5ce7b9235a0e?q=80&w=903&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Stylish Penthouse">
+                    </div>
+                    <div class="property-details">
+                        <div class="property-address">Skyline Penthouse</div>
+                        <div class="property-info">
+                            <span>🛏️ 3 Bed</span>
+                            <span>🛁 2.5 Bath</span>
+                            <span>📐 1,800 sq ft</span>
+                        </div>
+                        <div class="property-price">$5,200/month</div>
+                        <button class="btn btn-primary" onclick="goToPage('page2')">View in 3D</button>
+                    </div>
+                </div>
+
+                <div class="property-card">
+                    <div class="property-image">
+                        <img src="https://plus.unsplash.com/premium_photo-1661913412680-c274b6fea096?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Beachfront Condo">
+                    </div>
+                    <div class="property-details">
+                        <div class="property-address">Beachfront Paradise</div>
+                        <div class="property-info">
+                            <span>🛏️ 2 Bed</span>
+                            <span>🛁 2 Bath</span>
+                            <span>📐 1,450 sq ft</span>
+                        </div>
+                        <div class="property-price">$4,100/month</div>
+                        <button class="btn btn-primary" onclick="goToPage('page2')">View in 3D</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Download App</h3>
+                    <p>Get our application on your device. Available for Windows, Mac, iOS, and Android.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Enter Access Code</h3>
+                    <p>Input your access token to unlock exclusive property listings and features.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Browse Properties</h3>
+                    <p>Explore our curated collection of premium properties with detailed information.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>View in 3D</h3>
+                    <p>Experience immersive 3D tours and interactive floor plans for each property.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h3>Save Favorites</h3>
+                    <p>Mark properties you love and compare them side by side to make decisions.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <h3>Contact Agent</h3>
+                    <p>Connect with our professional agents for more information and site visits.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIALS -->
+        <section class="testimonials">
+            <h2>What Our Clients Say</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"The 3D tour feature helped me find my dream apartment without visiting in person. This is the future of real estate!"</p>
+                    <p class="testimonial-author">— Sarah Johnson</p>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Absolutely revolutionary! I saved so much time by viewing properties online first. Michell Realtor In is a game-changer."</p>
+                    <p class="testimonial-author">— Michael Chen</p>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Professional service with cutting-edge technology. The blueprints and measurements were incredibly accurate. Highly recommended!"</p>
+                    <p class="testimonial-author">— Emma Williams</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section class="contact" id="contact">
+            <h2>Get in Touch</h2>
+            <form class="contact-form" onsubmit="handleContactForm(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="contactName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="contactEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="contactMessage" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Send via WhatsApp</button>
+            </form>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>&copy; 2026 Michell Realtor In. All rights reserved.</p>
+            <p>Premium Real Estate Solutions | 3D Property Tours | Smart Property Search</p>
+            <p>Email: <a href="mailto:info@michellrealtorin.com">info@michellrealtorin.com</a> | Phone: <a href="tel:+12672239174">+1 (267) 223-9174</a></p>
+        </footer>
+    </div>
+
+    <!-- PAGE 2: TOKEN VERIFICATION -->
+    <div class="page" id="page2">
+        <div class="token-container">
+            <div class="token-box">
+                <h2>Access Verification</h2>
+                <p>Enter your access code to unlock exclusive property listings</p>
+                <input type="password" class="token-input" id="tokenInput" placeholder="Enter your access code">
+                <div class="error-message" id="errorMessage">Invalid access code. Please try again.</div>
+                <div class="token-buttons">
+                    <button class="verify-btn" onclick="verifyToken()">Verify</button>
+                    <button class="back-btn" onclick="goToPage('page1')">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 3: LOADING -->
+    <div class="page" id="page3">
+        <div class="loading-container">
+            <div class="loader"></div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <p class="loading-text">Preparing your experience...</p>
+        </div>
+    </div>
+
+    <!-- PAGE 4: DOWNLOAD -->
+    <div class="page" id="page4">
+        <div class="download-container">
+            <div class="download-box">
+                <div class="success-icon">✓</div>
+                <h2>Welcome Aboard!</h2>
+                <p>Your access has been verified successfully. Download our premium app now to start exploring properties in stunning 3D.</p>
+                
+                <ul class="features-list">
+                    <li>360° Immersive Property Tours</li>
+                    <li>Interactive Floor Plans & Blueprints</li>
+                    <li>Advanced Property Search Filters</li>
+                    <li>Save & Compare Favorites</li>
+                    <li>Real-time Property Updates</li>
+                    <li>Expert Agent Support</li>
+                </ul>
+
+                <div class="download-buttons">
+                    <button class="download-btn">🖥️ Windows</button>
+                    <button class="download-btn">🤖 Android</button>
+                </div>
+
+                <button class="back-home-btn" onclick="goToPage('page1')">Back to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Preloader - updated for new preloader ID and body.mr-loaded class approach
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.body.classList.add('mr-loaded');
+            }, 6500);
+        });
+
+        // Page Navigation
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Scroll to Section
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Token Verification
+        function verifyToken() {
+            const token = document.getElementById('tokenInput').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (token === 'HOME496705kLy') {
+                goToPage('page3');
+                setTimeout(() => {
+                    goToPage('page4');
+                }, 5000);
+            } else {
+                document.getElementById('tokenInput').classList.add('shake');
+                errorMessage.classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('tokenInput').classList.remove('shake');
+                }, 500);
+            }
+        }
+
+        // Allow Enter key to verify token
+        document.addEventListener('DOMContentLoaded', () => {
+            const tokenInput = document.getElementById('tokenInput');
+            if (tokenInput) {
+                tokenInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') verifyToken();
+                });
+            }
+        });
+
+        // Contact form sends to WhatsApp
+        function handleContactForm(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const message = document.getElementById('contactMessage').value;
+            
+            const whatsappNumber = '+12672239174';
+            const whatsappMessage = `Hello Michell Realtor In,%0A%0AName: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0AMessage: ${encodeURIComponent(message)}`;
+            
+            const whatsappURL = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${whatsappMessage}`;
+            
+            window.open(whatsappURL, '_blank');
+            
+            // Reset form
+            document.querySelector('.contact-form').reset();
+        }
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Apply animation based on the element type for more specific control if needed
+                    if (entry.target.classList.contains('feature-card')) {
+                        entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                    } else if (entry.target.classList.contains('property-card')) {
+                        entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                    } else if (entry.target.classList.contains('step')) {
+                        entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                    } else if (entry.target.classList.contains('testimonial-card')) {
+                        entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                    }
+                    // The original code only had fadeInUp for these, let's keep it general
+                    // entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .property-card, .step, .testimonial-card').forEach(el => {
+            observer.observe(el);
+        });
+
+    </script>
+</body>
+</html>
